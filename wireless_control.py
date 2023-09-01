@@ -9,11 +9,28 @@ import os
 import signal
 
 import qrcode
+import random
 
 pyautogui.FAILSAFE = False
 
+PORT_LOWERBOUND = 49152
+PORT_UPPERBOUND = 65535
+# Function to get the random port between provided range that isn't occupied
+def get_random_open_port(min_port, max_port):
+    while True:
+        random_port = random.randint(min_port, max_port)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)  # Set a timeout for the socket connection attempt
+
+        try:
+            sock.bind(('localhost', random_port))
+            sock.close()
+            return random_port  # Found an open port, return it
+        except OSError:
+            continue  # Port is in use, try another one
+
 # Constants for server configuration
-SERVER_PORT = 5555
+SERVER_PORT = get_random_open_port(PORT_LOWERBOUND, PORT_UPPERBOUND)
 
 # Flag to control the server loop
 server_running = False
